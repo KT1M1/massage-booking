@@ -1,0 +1,137 @@
+﻿<main class="register-page">
+  <div class="container">
+    <div class="register-container">
+      <div class="register-visual">
+        <div class="visual-content">
+          <i class="visual-icon ui-icon" [class]="icons.calendar.className + ' visual-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+          <h2>Csatlakozz hozzánk</h2>
+          <p>Hozz létre egy fiókot és fedezd fel a Serenity Spa összes előnyét.</p>
+        </div>
+      </div>
+
+      <div class="register-card">
+        <div class="register-header">
+          <i class="register-icon ui-icon" [class]="icons.calendar.className + ' register-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+          <h1>Regisztráció</h1>
+          <p class="register-subtitle">Hozz létre egy új fiókot</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">Keresztnév *</label>
+              <input
+                type="text"
+                id="firstName"
+                [(ngModel)]="firstName"
+                name="firstName"
+                required
+                placeholder="pl. János"
+                class="form-input"
+                [disabled]="isLoading">
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">Vezetéknév *</label>
+              <input
+                type="text"
+                id="lastName"
+                [(ngModel)]="lastName"
+                name="lastName"
+                required
+                placeholder="pl. Kovács"
+                class="form-input"
+                [disabled]="isLoading">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail cím *</label>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="email"
+              name="email"
+              required
+              placeholder="pelda@email.hu"
+              class="form-input"
+              [disabled]="isLoading"
+              autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Telefonszám</label>
+            <input
+              type="tel"
+              id="phone"
+              [(ngModel)]="phone"
+              name="phone"
+              placeholder="+36 30 123 4567"
+              class="form-input"
+              [disabled]="isLoading">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Jelszó *</label>
+            <input
+              type="password"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              required
+              placeholder="Legalább 8 karakter"
+              class="form-input"
+              [disabled]="isLoading"
+              autocomplete="new-password">
+            <p class="form-hint">Legalább 8 karakterből álljon, egy nagy- és kisbetűvel, valamint egy számmal.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Jelszó megerősítése *</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              required
+              placeholder="Jelszó újra"
+              class="form-input"
+              [disabled]="isLoading"
+              autocomplete="new-password">
+          </div>
+
+          <div class="form-group checkbox">
+            <input type="checkbox" id="terms" name="terms" required>
+            <label for="terms">
+              Elfogadom az <a href="#">általános szerződési feltételeket</a> és az <a href="#">adatvédelmi nyilatkozatot</a> *
+            </label>
+          </div>
+
+          <div class="alert alert-error" *ngIf="errorMessage">
+            <i class="alert-icon ui-icon" [class]="icons.check.className + ' alert-icon ui-icon'" [attr.aria-label]="icons.check.label"></i>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <div class="alert alert-success" *ngIf="successMessage">
+            <i class="alert-icon ui-icon" [class]="icons.check.className + ' alert-icon ui-icon'" [attr.aria-label]="icons.check.label"></i>
+            <span>{{ successMessage }}</span>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg btn-full"
+            [disabled]="isLoading">
+            <span *ngIf="isLoading">
+              <span class="spinner"></span> Regisztráció...
+            </span>
+            <span *ngIf="!isLoading">Regisztráció</span>
+          </button>
+        </form>
+
+        <div class="register-footer">
+          <p class="login-link">Van már fiókod? <a routerLink="/login" class="link-primary">Jelentkezz be itt</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,151 @@
+﻿<main class="booking-page" *ngIf="service">
+  <div class="container">
+    <div class="booking-header">
+      <h1>Foglaljon időpontot</h1>
+      <p class="booking-subtitle">{{ service.name }} - {{ service.price | number }} Ft</p>
+    </div>
+
+    <div class="progress-steps">
+      <div class="step" [class.completed]="!!selectedProfessional" [class.active]="true">
+        <div class="step-indicator">1</div>
+        <span class="step-label">Masszőr</span>
+      </div>
+      <div class="step-connector" [class.completed]="!!selectedProfessional"></div>
+
+      <div class="step" [class.completed]="!!selectedDate" [class.active]="!!selectedProfessional">
+        <div class="step-indicator">2</div>
+        <span class="step-label">Dátum</span>
+      </div>
+      <div class="step-connector" [class.completed]="!!selectedDate"></div>
+
+      <div class="step" [class.completed]="!!selectedTimeSlot" [class.active]="!!selectedDate">
+        <div class="step-indicator">3</div>
+        <span class="step-label">Időpont</span>
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="booking-form">
+      <div class="form-section active">
+        <div class="section-header">
+          <h3>Válasszon masszőrt az ön preferenciája szerint</h3>
+          <p class="section-description">Válassza ki a masszőrt, akinél szeretne foglalni.</p>
+        </div>
+
+        <div class="professional-grid">
+          <div
+            *ngFor="let prof of professionals"
+            class="professional-card"
+            [class.selected]="selectedProfessional === prof.id"
+            (click)="selectedProfessional = prof.id; onProfessionalChange()">
+            <div class="professional-avatar">
+              <img [src]="getProfessionalImage(prof.id)" [alt]="formatProfessionalFullName(prof.lastName, prof.firstName)" />
+            </div>
+            <h4>{{ formatProfessionalFullName(prof.lastName, prof.firstName) }}</h4>
+            <p class="professional-specialty">Masszőr</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="selectedProfessional">
+        <div class="section-header">
+          <h3>Válasszon dátumot</h3>
+          <p class="section-description">Jelölje ki a rendelkezésre álló napon az időpontot.</p>
+        </div>
+
+        <div class="date-input-wrapper">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Válasszon dátumot</mat-label>
+            <input
+              matInput
+              #bookingDateInput
+              [matDatepicker]="picker"
+              [matDatepickerFilter]="isAllowedBookingDate"
+              [(ngModel)]="selectedDate"
+              name="date"
+              [min]="minDate"
+              (input)="onDateTextInput(bookingDateInput.value)"
+              (dateChange)="onDateChange()"
+              required>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+      </div>
+
+      <div class="form-section" *ngIf="selectedDate && availableTimeSlots.length > 0">
+        <div class="section-header">
+          <h3>Válasszon időpontot</h3>
+          <p class="section-description">Válassza ki az ön számára megfelelő időpontot.</p>
+        </div>
+
+        <div class="time-slots-grid">
+          <button
+            type="button"
+            class="time-slot-btn"
+            *ngFor="let slot of availableTimeSlots"
+            [class.selected]="selectedTimeSlot === slot.id"
+            (click)="selectedTimeSlot = slot.id">
+            <span class="time-slot-time">{{ slot.startTime }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="selectedTimeSlot">
+        <div class="section-header">
+          <h3>Megjegyzés (opcionális)</h3>
+          <p class="section-description">Írjon különleges kérést vagy megjegyzést, ha szükséges.</p>
+        </div>
+
+        <textarea
+          [(ngModel)]="notes"
+          name="notes"
+          placeholder="Pl. fájdalmas terület, allergiák, egyéb kérés"
+          class="form-textarea"></textarea>
+      </div>
+
+      <div class="booking-summary-card" *ngIf="selectedTimeSlot">
+        <h4>Foglalás összesítése</h4>
+        <div class="summary-item">
+          <span class="summary-label">Szolgáltatás:</span>
+          <span class="summary-value">{{ service?.name }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Terapeuta:</span>
+          <span class="summary-value">{{ getProfessionalName(selectedProfessional) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Dátum:</span>
+          <span class="summary-value">{{ formatDate(selectedDate) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Időpont:</span>
+          <span class="summary-value">{{ getSelectedTimeSlotText() }}</span>
+        </div>
+        <div class="summary-item total">
+          <span class="summary-label">Ár:</span>
+          <span class="summary-value">{{ service?.price | number }} Ft</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg btn-full"
+          [disabled]="isLoading || !selectedProfessional || !selectedDate || !selectedTimeSlot">
+          <span *ngIf="isLoading">
+            <span class="spinner"></span> Foglalás folyamatban...
+          </span>
+          <span *ngIf="!isLoading">Foglalás megerősítése</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<div class="empty-state" *ngIf="!service">
+  <div class="container">
+    <div class="loading-spinner"></div>
+    <p>Betöltés...</p>
+  </div>
+</div>

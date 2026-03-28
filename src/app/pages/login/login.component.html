@@ -1,0 +1,79 @@
+﻿<main class="login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <i class="login-icon ui-icon" [class]="icons.calendar.className + ' login-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+        <h1>Bejelentkezés</h1>
+        <p class="login-subtitle">Jelentkezz be a fiókodba</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="email">E-mail cím</label>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="email"
+            name="email"
+            required
+            placeholder="pelda@email.hu"
+            class="form-input"
+            [disabled]="isLoading"
+            autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Jelszó</label>
+          <input
+            type="password"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            placeholder="A jelszavad"
+            class="form-input"
+            [disabled]="isLoading"
+            autocomplete="current-password">
+        </div>
+
+        <div class="form-group checkbox">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Emlékezz rám</label>
+        </div>
+
+        <div class="alert alert-error" *ngIf="errorMessage">
+          <i class="alert-icon ui-icon" [class]="icons.check.className + ' alert-icon ui-icon'" [attr.aria-label]="icons.check.label"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg btn-full"
+          [disabled]="isLoading">
+          <span *ngIf="isLoading">
+            <span class="spinner"></span> Bejelentkezés...
+          </span>
+          <span *ngIf="!isLoading">Bejelentkezés</span>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p class="signup-link">Nincs még fiókod? <a routerLink="/register" class="link-primary">Regisztrálj itt</a></p>
+
+        <div class="demo-info">
+          <h4>Demo fiók:</h4>
+          <p class="demo-cred">E-mail: <code>user&#64;masszazs.hu</code></p>
+          <p class="demo-cred">Jelszó: <code>user</code></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-visual">
+      <div class="visual-content">
+        <i class="visual-icon ui-icon" [class]="icons.professional.className + ' visual-icon ui-icon'" [attr.aria-label]="icons.professional.label"></i>
+        <h2>Üdv újra!</h2>
+        <p>Fedezd fel a tökéletes masszázs kezeléseket az igényeid szerint.</p>
+      </div>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,273 @@
+.register-page {
+  min-height: 100vh;
+  padding: var(--spacing-2xl) var(--spacing-md);
+  background: linear-gradient(135deg, var(--bg-main) 0%, var(--color-secondary) 100%);
+}
+
+.register-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+  align-items: stretch;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+.register-card {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-2xl);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 768px) {
+    padding: var(--spacing-3xl);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  @media (min-width: 1024px) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+
+  .register-icon {
+    font-size: var(--font-size-5xl);
+    display: block;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  h1 {
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+
+    @media (min-width: 768px) {
+      font-size: var(--font-size-4xl);
+    }
+  }
+
+  .register-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--font-size-base);
+  }
+}
+
+.register-form {
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-lg);
+
+    label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-primary);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-sm);
+
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: all var(--transition-fast);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 2px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      font-size: var(--font-size-base);
+      font-family: inherit;
+      color: var(--text-primary);
+      background-color: var(--bg-primary);
+      transition: all var(--transition-fast);
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(90, 143, 123, 0.1);
+      }
+
+      &:disabled {
+        background-color: var(--bg-tertiary);
+        color: var(--text-tertiary);
+        cursor: not-allowed;
+      }
+
+      &::placeholder {
+        color: var(--text-tertiary);
+      }
+    }
+
+    .form-hint {
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
+      margin: var(--spacing-xs) 0 0 0;
+    }
+
+    &.checkbox {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-md);
+
+      input[type='checkbox'] {
+        width: 20px;
+        height: 20px;
+        margin-right: var(--spacing-md);
+        margin-top: 2px;
+        cursor: pointer;
+        accent-color: var(--color-primary);
+        flex-shrink: 0;
+      }
+
+      label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: var(--font-weight-normal);
+        line-height: var(--line-height-relaxed);
+        font-size: var(--font-size-sm);
+      }
+    }
+  }
+
+  .btn-full {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+  }
+}
+
+.alert {
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+
+  &.alert-error {
+    background-color: rgba(196, 79, 79, 0.1);
+    color: var(--color-error);
+    border: 1px solid rgba(196, 79, 79, 0.2);
+  }
+
+  &.alert-success {
+    background-color: rgba(90, 143, 123, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(90, 143, 123, 0.2);
+  }
+
+  .alert-icon {
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+  }
+}
+
+.register-footer {
+  margin-top: auto;
+  padding-top: var(--spacing-2xl);
+  border-top: 2px solid var(--color-border);
+  text-align: center;
+
+  .login-link {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+
+    .link-primary {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-bold);
+      transition: all var(--transition-fast);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.register-visual {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  height: 100%;
+  border-radius: var(--border-radius-xl);
+  background-image: linear-gradient(rgba(31, 40, 37, 0.45), rgba(31, 40, 37, 0.45)), url('/assets/img/login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  @media (min-width: 768px) {
+    display: flex;
+    border-radius: 0;
+  }
+
+  @media (min-width: 1024px) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .visual-content {
+    text-align: center;
+    color: var(--text-inverse);
+
+    .visual-icon {
+      font-size: var(--font-size-6xl);
+      display: block;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.9;
+    }
+
+    h2 {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      margin: 0 0 var(--spacing-md) 0;
+      opacity: 0.95;
+    }
+
+    p {
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-relaxed);
+      opacity: 0.85;
+      margin: 0;
+    }
+  }
+}

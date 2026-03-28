@@ -1,18 +1,18 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Ew36zBjj)
 # Webfejlesztési keretrendszerek — Projektmunka
 
-> **Hallgató neve:** _[Írd ide a neved]_  
-> **Neptun kód:** _[Írd ide a Neptun kódod]_  
-> **Projekt téma:** _[Írd ide a választott témát]_  
-> **Keretrendszer:** _[Írd ide a választott keretrendszert]_
+> **Hallgató neve:** _Kis Tímea_  
+> **Neptun kód:** _CLKAUZ_  
+> **Projekt téma:** _Masszázs időpontfoglaló oldal_  
+> **Keretrendszer:** _Angular_
 
 ---
 
 ## 🚀 A projekt indítása (lokális futtatás)
 
 ```bash
-git clone <repo-url>
-cd <projekt-mappa>
+git clone https://github.com/webfejlesztesi-keretrendszerek-2026/projektmunka-KT1M1.git
+cd projektmunka-KT1M1
 npm install
 npm start
 ```

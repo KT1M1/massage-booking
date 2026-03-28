@@ -1,0 +1,117 @@
+﻿<main class="service-detail-page" *ngIf="service">
+  <div class="service-hero">
+    <div class="container">
+      <a routerLink="/" class="breadcrumb">
+        <i class="ui-icon" [class]="icons.arrowLeft.className + ' ui-icon'" [attr.aria-label]="icons.arrowLeft.label"></i>
+        Vissza a főoldalra
+      </a>
+      <div class="hero-content">
+        <i class="service-icon ui-icon" [class]="icons.professional.className + ' service-icon ui-icon'" [attr.aria-label]="icons.professional.label"></i>
+        <h1>{{ service.name }}</h1>
+        <p class="service-tagline">Fedezd fel a luxus masszázs kezelések világát</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="service-layout">
+      <section class="service-main">
+        <div class="service-card">
+          <div class="service-image-large">
+            <img [src]="service?.image || '/assets/img/massage1.jpg'" [alt]="service?.name" />
+          </div>
+
+          <div class="service-info">
+            <h2>Szolgáltatás részletei</h2>
+            <p>{{ service.description }}</p>
+
+            <div class="features-list">
+              <div class="feature-item">
+                <i class="feature-icon ui-icon" [class]="icons.professional.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.professional.label"></i>
+                <div>
+                  <h4>Szakmai terapeuta</h4>
+                  <p>Végzett és tapasztalt terapeuta.</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <i class="feature-icon ui-icon" [class]="icons.calendar.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+                <div>
+                  <h4>Luxus kényelem</h4>
+                  <p>Kényelmes és ellazító környezet.</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <i class="feature-icon ui-icon" [class]="icons.check.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.check.label"></i>
+                <div>
+                  <h4>Egészség előnyei</h4>
+                  <p>Mentális feltöltődés és fizikai jóllét.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="service-sidebar">
+        <div class="price-card">
+          <div class="price-header">
+            <span class="label">Ár</span>
+            <span class="price-value">{{ service.price | number }} Ft</span>
+          </div>
+
+          <div class="service-specs">
+            <div class="spec">
+              <i class="spec-icon ui-icon" [class]="icons.timer.className + ' spec-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
+              <div class="spec-content">
+                <p class="spec-label">Időtartam</p>
+                <p class="spec-value">{{ service.duration }} perc</p>
+              </div>
+            </div>
+
+            <div class="spec">
+              <i class="spec-icon ui-icon" [class]="icons.money.className + ' spec-icon ui-icon'" [attr.aria-label]="icons.money.label"></i>
+              <div class="spec-content">
+                <p class="spec-label">Kategória</p>
+                <p class="spec-value">{{ service.category }}</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary btn-lg btn-full"
+            (click)="onBookService()"
+            [disabled]="!isLoggedIn">
+            <span *ngIf="isLoggedIn">Időpont foglalása</span>
+            <span *ngIf="!isLoggedIn">Bejelentkezés szükséges</span>
+          </button>
+
+          <p *ngIf="!isLoggedIn" class="login-hint">
+            Az időpontfoglaláshoz <a routerLink="/login" class="link">jelentkezz be</a> vagy
+            <a routerLink="/register" class="link">regisztrálj</a>.
+          </p>
+        </div>
+
+        <div class="benefits-card">
+          <h4>Miért ezt a szolgáltatást?</h4>
+          <ul class="benefits-list">
+            <li>Stressz és fájdalomcsökkentés</li>
+            <li>Javuló vérkeringés</li>
+            <li>Javított rugalmasság</li>
+            <li>Mélyen ellazító élmény</li>
+            <li>Személyre szabott kezelés</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div class="empty-state" *ngIf="!service">
+  <div class="container">
+    <div class="loading-spinner"></div>
+    <p>Szolgáltatás betöltése...</p>
+  </div>
+</div>

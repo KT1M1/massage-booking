@@ -1,0 +1,80 @@
+﻿<main class="home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">Serenity Spa Masszázs Szalon</h1>
+        <p class="hero-subtitle">Fedezze fel a teljes testi és lelki egyensúly útját. Szakmailag képzett masszőrök személyre szabott kezeléseket nyújtanak az Ön igényei szerint.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Services Section -->
+  <section class="featured-services">
+    <div class="container">
+      <h2 class="section-title">Kiemelt szolgáltatások</h2>
+      <p class="section-subtitle">Ismerje meg népszerű masszázskezeléseinket, amelyek testét és szellemét felfrissítik.</p>
+      
+      <div class="services-grid">
+        <article class="service-card" *ngFor="let service of services">
+          <div class="service-image-placeholder">
+            <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" class="service-image" />
+          </div>
+          <div class="service-content">
+            <h3 class="service-title">{{ service.name }}</h3>
+            <p class="service-description">{{ service.description }}</p>
+            
+            <div class="service-features">
+              <div class="feature">
+                <i class="feature-icon ui-icon" [class]="icons.timer.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
+                <span class="feature-text">{{ service.duration }} perc</span>
+              </div>
+              <div class="feature">
+                <i class="feature-icon ui-icon" [class]="icons.money.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.money.label"></i>
+                <span class="feature-text">{{ service.price | number }} Ft</span>
+              </div>
+            </div>
+
+            <a [routerLink]="['/services', service.id]" class="btn btn-primary">
+              <span>Foglalás</span>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Section -->
+  <section class="why-choose">
+    <div class="container">
+      <h2 class="section-title white">Miért válasszon minket?</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="feature-icon-large ui-icon" [class]="icons.professional.className + ' feature-icon-large ui-icon'" [attr.aria-label]="icons.professional.label"></i>
+          <h3>Professzionális terapeuták</h3>
+          <p>Tapasztalt masszőrök magas színvonalú kezeléseket nyújtanak.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="feature-icon-large ui-icon" [class]="icons.calendar.className + ' feature-icon-large ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+          <h3>Teljes relaxáció</h3>
+          <p>Nyugodt, barátságos környezet a testi feltöltődés és a lelki egyensúly érdekében.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="feature-icon-large ui-icon" [class]="icons.check.className + ' feature-icon-large ui-icon'" [attr.aria-label]="icons.check.label"></i>
+          <h3>Személyre szabott</h3>
+          <p>Minden kezelés az Ön igényeihez és elvárásaihoz igazodik.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="feature-icon-large ui-icon" [class]="icons.money.className + ' feature-icon-large ui-icon'" [attr.aria-label]="icons.money.label"></i>
+          <h3>Kedvező árak</h3>
+          <p>Versenyképes árak minden kezelésre, rejtett költségek nélkül.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
