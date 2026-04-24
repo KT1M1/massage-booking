@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
-import { Service, Professional, TimeSlot } from '../../models/models';
+import { Professional, Service, TimeSlot } from '../../models/models';
 import { BookingService } from '../../services/booking.service';
 import { ICON_PACK } from '../../shared/icon-pack';
 
@@ -28,13 +28,14 @@ export class BookingComponent implements OnInit {
   icons = ICON_PACK;
   service: Service | null = null;
   professionals: Professional[] = [];
-  selectedProfessional: string = '';
+  selectedProfessional = '';
   selectedDate: Date | null = null;
   minDate: Date = this.getMinDate();
   availableTimeSlots: TimeSlot[] = [];
-  selectedTimeSlot: string = '';
-  notes: string = '';
+  selectedTimeSlot = '';
+  notes = '';
   isLoading = false;
+  hasLoadedTimeSlots = false;
   typedDateValue = '';
 
   constructor(
@@ -46,14 +47,14 @@ export class BookingComponent implements OnInit {
   ngOnInit() {
     const serviceId = this.route.snapshot.queryParamMap.get('serviceId');
     if (serviceId) {
-      this.bookingService.getServiceById(serviceId).subscribe(service => {
+      this.bookingService.getServiceById(serviceId).subscribe((service) => {
         this.service = service || null;
+        this.loadProfessionals();
       });
+      return;
     }
 
-    this.bookingService.getProfessionals().subscribe(professionals => {
-      this.professionals = professionals;
-    });
+    this.loadProfessionals();
   }
 
   onProfessionalChange() {
@@ -69,6 +70,7 @@ export class BookingComponent implements OnInit {
         this.selectedDate = null;
         this.selectedTimeSlot = '';
         this.availableTimeSlots = [];
+        this.hasLoadedTimeSlots = false;
         return;
       }
 
@@ -79,6 +81,7 @@ export class BookingComponent implements OnInit {
       this.selectedDate = null;
       this.selectedTimeSlot = '';
       this.availableTimeSlots = [];
+      this.hasLoadedTimeSlots = false;
       return;
     }
 
@@ -94,17 +97,20 @@ export class BookingComponent implements OnInit {
       this.selectedDate = null;
       this.selectedTimeSlot = '';
       this.availableTimeSlots = [];
+      this.hasLoadedTimeSlots = false;
     }
   }
 
   loadTimeSlots() {
-    if (!this.selectedDate) {
+    if (!this.selectedDate || !this.service || !this.selectedProfessional) {
       this.availableTimeSlots = [];
+      this.hasLoadedTimeSlots = false;
       return;
     }
 
-    this.bookingService.getTimeSlots(this.selectedProfessional, this.selectedDate).subscribe(slots => {
-      this.availableTimeSlots = slots.filter(slot => slot.available);
+    this.bookingService.getTimeSlots(this.selectedProfessional, this.selectedDate, this.service.id).subscribe((slots) => {
+      this.availableTimeSlots = slots.filter((slot) => slot.available);
+      this.hasLoadedTimeSlots = true;
     });
   }
 
@@ -112,10 +118,11 @@ export class BookingComponent implements OnInit {
     if (this.typedDateValue.trim()) {
       const parsedTypedDate = this.parseTypedDate(this.typedDateValue);
       if (!parsedTypedDate) {
-        alert('Érvénytelen dátum formátum. Példa: 2026.04.15.');
+        alert('Érvénytelen dátumformátum. Példa: 2026.04.15.');
         this.selectedDate = null;
         this.selectedTimeSlot = '';
         this.availableTimeSlots = [];
+        this.hasLoadedTimeSlots = false;
         return;
       }
 
@@ -123,15 +130,16 @@ export class BookingComponent implements OnInit {
     }
 
     if (!this.service || !this.selectedProfessional || !this.selectedDate || !this.selectedTimeSlot) {
-      alert('Kérjük, töltsd ki az összes mezőt.');
+      alert('Kérjük, töltse ki az összes mezőt.');
       return;
     }
 
     if (!this.isAllowedBookingDate(this.selectedDate)) {
-      alert('Csak holnaptól kezdődő dátumra foglalhatsz.');
+      alert('Csak holnaptól kezdődő dátumra foglalhat.');
       this.selectedDate = null;
       this.selectedTimeSlot = '';
       this.availableTimeSlots = [];
+      this.hasLoadedTimeSlots = false;
       return;
     }
 
@@ -143,7 +151,7 @@ export class BookingComponent implements OnInit {
       this.selectedDate,
       this.selectedTimeSlot,
       this.notes
-    ).subscribe(success => {
+    ).subscribe((success) => {
       this.isLoading = false;
       if (success) {
         alert('Foglalás sikeresen létrehozva.');
@@ -234,13 +242,13 @@ export class BookingComponent implements OnInit {
   }
 
   getProfessionalImage(professionalId: string): string {
-    const prof = this.professionals.find(p => p.id === professionalId);
+    const prof = this.professionals.find((professional) => professional.id === professionalId);
     return prof?.image || '/assets/img/background2.jpg';
   }
 
   getProfessionalName(professionalId: string): string {
-    const prof = this.professionals.find(p => p.id === professionalId);
-    return prof ? `${prof.lastName} ${prof.firstName}` : 'Ismeretlen terapeuta';
+    const prof = this.professionals.find((professional) => professional.id === professionalId);
+    return prof ? `${prof.lastName} ${prof.firstName}` : 'Ismeretlen szakember';
   }
 
   formatProfessionalFullName(lastName: string, firstName: string): string {
@@ -248,7 +256,13 @@ export class BookingComponent implements OnInit {
   }
 
   getSelectedTimeSlotText(): string {
-    const slot = this.availableTimeSlots.find(s => s.id === this.selectedTimeSlot);
+    const slot = this.availableTimeSlots.find((timeSlot) => timeSlot.id === this.selectedTimeSlot);
     return slot ? `${slot.startTime} - ${slot.endTime}` : this.selectedTimeSlot;
+  }
+
+  private loadProfessionals() {
+    this.bookingService.getProfessionals(this.service?.id).subscribe((professionals) => {
+      this.professionals = professionals;
+    });
   }
 }

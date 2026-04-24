@@ -18,7 +18,7 @@
       <section class="service-main">
         <div class="service-card">
           <div class="service-image-large">
-            <img [src]="service?.image || '/assets/img/massage1.jpg'" [alt]="service?.name" />
+            <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" />
           </div>
 
           <div class="service-info">
@@ -58,7 +58,7 @@
         <div class="price-card">
           <div class="price-header">
             <span class="label">Ár</span>
-            <span class="price-value">{{ service.price | number }} Ft</span>
+            <span class="price-value">{{ service.priceHuf | number }} Ft</span>
           </div>
 
           <div class="service-specs">
@@ -66,7 +66,7 @@
               <i class="spec-icon ui-icon" [class]="icons.timer.className + ' spec-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
               <div class="spec-content">
                 <p class="spec-label">Időtartam</p>
-                <p class="spec-value">{{ service.duration }} perc</p>
+                <p class="spec-value">{{ service.durationMinutes }} perc</p>
               </div>
             </div>
 

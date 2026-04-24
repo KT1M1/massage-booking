@@ -1,117 +1,204 @@
 ﻿<main class="profile-page">
   <div class="container">
-    <div class="profile-header">
-      <div class="header-content">
-        <div class="user-avatar">
-          <i class="ui-icon" [class]="icons.professional.className + ' ui-icon'" [attr.aria-label]="icons.professional.label"></i>
-        </div>
-        <div>
-          <h1>Üdvözöljük, {{ userName }}!</h1>
-          <p class="header-subtitle">Kezeld a foglalásaidat és személyes adataidat</p>
-        </div>
-      </div>
-      <a routerLink="/booking" class="btn btn-primary">
-        <span>+ Új foglalás</span>
-      </a>
+
+    <div *ngIf="isLoading" class="profile-loading">
+      Profil betöltése...
     </div>
 
-    <section class="bookings-section">
-      <div class="section-header">
-        <h2>Foglalásaim</h2>
-        <p class="section-subtitle">Az alábbi lista tartalmazza az összes foglalásodat</p>
-      </div>
+    <div *ngIf="!isLoading && errorMessage" class="profile-error">
+      {{ errorMessage }}
+    </div>
 
-      <div class="bookings-content">
-        <div class="bookings-list" *ngIf="bookings && bookings.length > 0; else noBookings">
-          <article class="booking-card" *ngFor="let booking of bookings" [class.cancelled]="booking.status === 'cancelled'">
-            <div class="booking-card-header">
-              <div class="booking-left">
-                <div class="booking-icon">
-                  <img [src]="getProfessionalImage(booking.professionalId)" [alt]="getProfessionalName(booking.professionalId)" />
-                </div>
-                <div class="booking-info">
-                  <h3 class="booking-title">{{ getServiceName(booking.serviceId) }}</h3>
-                  <p class="booking-professional">{{ getProfessionalName(booking.professionalId) }}</p>
-                </div>
-              </div>
-              <span class="status-badge" [class.status-confirmed]="booking.status === 'confirmed'" [class.status-pending]="booking.status === 'pending'" [class.status-cancelled]="booking.status === 'cancelled'">
-                {{ getStatusText(booking.status) }}
-              </span>
-            </div>
-
-            <div class="booking-details">
-              <div class="detail-item">
-                <i class="detail-icon ui-icon" [class]="icons.calendar.className + ' detail-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
-                <div class="detail-content">
-                  <p class="detail-label">Dátum</p>
-                  <p class="detail-value">{{ booking.date | date:'yyyy. MMMM dd.' }}</p>
-                </div>
-              </div>
-
-              <div class="detail-item">
-                <i class="detail-icon ui-icon" [class]="icons.timer.className + ' detail-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
-                <div class="detail-content">
-                  <p class="detail-label">Időpont</p>
-                  <p class="detail-value">{{ booking.timeSlot }}</p>
-                </div>
-              </div>
-
-              <div class="detail-item" *ngIf="booking.notes">
-                <i class="detail-icon ui-icon" [class]="icons.check.className + ' detail-icon ui-icon'" [attr.aria-label]="icons.check.label"></i>
-                <div class="detail-content">
-                  <p class="detail-label">Megjegyzés</p>
-                  <p class="detail-value">{{ booking.notes }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="booking-actions" *ngIf="booking.status !== 'cancelled'">
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm"
-                (click)="onCancelBooking(booking.id)"
-                title="Foglalás lemondása">
-                <span><i class="ui-icon" [class]="icons.trash.className + ' ui-icon'" [attr.aria-label]="icons.trash.label"></i> Lemondás</span>
-              </button>
-            </div>
-          </article>
-        </div>
-
-        <ng-template #noBookings>
-          <div class="no-bookings-state">
-            <div class="empty-icon">
-              <i class="ui-icon" [class]="icons.search.className + ' ui-icon'" [attr.aria-label]="icons.search.label"></i>
-            </div>
-            <h3>Nincs foglalásod még</h3>
-            <p>Kezdd el a masszázs élményt az első foglalással.</p>
-            <a routerLink="/booking" class="btn btn-primary btn-lg">Foglalj most</a>
+    <ng-container *ngIf="!isLoading && !errorMessage">
+      <div class="profile-header">
+        <div class="header-content">
+          <div class="user-avatar">
+            <i
+              class="ui-icon"
+              [class]="icons.professional.className + ' ui-icon'"
+              [attr.aria-label]="icons.professional.label">
+            </i>
           </div>
-        </ng-template>
-      </div>
-    </section>
 
-    <section class="bookings-stats" *ngIf="bookings && bookings.length > 0">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="ui-icon" [class]="icons.check.className + ' ui-icon'" [attr.aria-label]="icons.check.label"></i>
+          <div>
+            <h1>Üdvözöljük, {{ userName }}!</h1>
+            <p class="header-subtitle">Kezeld a foglalásaidat és személyes adataidat</p>
+          </div>
         </div>
-        <h4>Megerősített</h4>
-        <p class="stat-value">{{ getBookingCount('confirmed') }}</p>
+
+        <a routerLink="/booking" class="btn btn-primary">
+          <span>+ Új foglalás</span>
+        </a>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="ui-icon" [class]="icons.timer.className + ' ui-icon'" [attr.aria-label]="icons.timer.label"></i>
+
+      <section class="bookings-section">
+        <div class="section-header">
+          <h2>Foglalásaim</h2>
+          <p class="section-subtitle">Az alábbi lista tartalmazza az összes foglalásodat</p>
         </div>
-        <h4>Függőben</h4>
-        <p class="stat-value">{{ getBookingCount('pending') }}</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="ui-icon" [class]="icons.calendar.className + ' ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+
+        <div class="bookings-content">
+          <div class="bookings-list" *ngIf="bookings && bookings.length > 0; else noBookings">
+            <article
+              class="booking-card"
+              *ngFor="let booking of bookings"
+              [class.cancelled]="booking.status === 'cancelled'">
+
+              <div class="booking-card-header">
+                <div class="booking-left">
+                  <div class="booking-icon">
+                    <img
+                      [src]="getServiceImage(booking.serviceId)"
+                      [alt]="getServiceName(booking.serviceId)" />
+                  </div>
+
+                  <div class="booking-info">
+                    <h3 class="booking-title">{{ getServiceName(booking.serviceId) }}</h3>
+                    <p class="booking-professional">
+                      {{ getProfessionalName(booking.adminId) }}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  class="status-badge"
+                  [class.status-confirmed]="booking.status === 'confirmed'"
+                  [class.status-pending]="booking.status === 'pending'"
+                  [class.status-completed]="booking.status === 'completed'"
+                  [class.status-cancelled]="booking.status === 'cancelled'">
+                  {{ getStatusText(booking.status) }}
+                </span>
+              </div>
+
+              <div class="booking-details">
+                <div class="detail-item">
+                  <i
+                    class="detail-icon ui-icon"
+                    [class]="icons.calendar.className + ' detail-icon ui-icon'"
+                    [attr.aria-label]="icons.calendar.label">
+                  </i>
+
+                  <div class="detail-content">
+                    <p class="detail-label">Dátum</p>
+                    <p class="detail-value">{{ booking.startsAt | date:'yyyy. MMMM dd.' }}</p>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <i
+                    class="detail-icon ui-icon"
+                    [class]="icons.timer.className + ' detail-icon ui-icon'"
+                    [attr.aria-label]="icons.timer.label">
+                  </i>
+
+                  <div class="detail-content">
+                    <p class="detail-label">Időpont</p>
+                    <p class="detail-value">{{ booking.startsAt | date:'HH:mm' }} - {{ booking.endsAt | date:'HH:mm' }}</p>
+                  </div>
+                </div>
+
+                <div class="detail-item" *ngIf="booking.clientNote">
+                  <i
+                    class="detail-icon ui-icon"
+                    [class]="icons.check.className + ' detail-icon ui-icon'"
+                    [attr.aria-label]="icons.check.label">
+                  </i>
+
+                  <div class="detail-content">
+                    <p class="detail-label">Megjegyzés</p>
+                    <p class="detail-value">{{ booking.clientNote }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="booking-actions"
+                *ngIf="booking.status === 'pending' || booking.status === 'confirmed'">
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm"
+                  (click)="onCancelBooking(booking.id)"
+                  title="Foglalás lemondása">
+                  <span>
+                    <i
+                      class="ui-icon"
+                      [class]="icons.trash.className + ' ui-icon'"
+                      [attr.aria-label]="icons.trash.label">
+                    </i>
+                    Lemondás
+                  </span>
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #noBookings>
+            <div class="no-bookings-state">
+              <div class="empty-icon">
+                <i
+                  class="ui-icon"
+                  [class]="icons.search.className + ' ui-icon'"
+                  [attr.aria-label]="icons.search.label">
+                </i>
+              </div>
+
+              <h3>Nincs foglalásod még</h3>
+              <p>Kezdd el a masszázs élményt az első foglalással.</p>
+              <a routerLink="/booking" class="btn btn-primary btn-lg">Foglalj most</a>
+            </div>
+          </ng-template>
         </div>
-        <h4>Lemondott</h4>
-        <p class="stat-value">{{ getBookingCount('cancelled') }}</p>
-      </div>
-    </section>
+      </section>
+
+      <section class="bookings-stats" *ngIf="bookings && bookings.length > 0">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i
+              class="ui-icon"
+              [class]="icons.check.className + ' ui-icon'"
+              [attr.aria-label]="icons.check.label">
+            </i>
+          </div>
+          <h4>Megerősített</h4>
+          <p class="stat-value">{{ getBookingCount('confirmed') }}</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i
+              class="ui-icon"
+              [class]="icons.timer.className + ' ui-icon'"
+              [attr.aria-label]="icons.timer.label">
+            </i>
+          </div>
+          <h4>Függőben</h4>
+          <p class="stat-value">{{ getBookingCount('pending') }}</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i
+              class="ui-icon"
+              [class]="icons.check.className + ' ui-icon'"
+              [attr.aria-label]="icons.check.label">
+            </i>
+          </div>
+          <h4>Befejezett</h4>
+          <p class="stat-value">{{ getBookingCount('completed') }}</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i
+              class="ui-icon"
+              [class]="icons.calendar.className + ' ui-icon'"
+              [attr.aria-label]="icons.calendar.label">
+            </i>
+          </div>
+          <h4>Lemondott</h4>
+          <p class="stat-value">{{ getBookingCount('cancelled') }}</p>
+        </div>
+      </section>
+    </ng-container>
   </div>
 </main>

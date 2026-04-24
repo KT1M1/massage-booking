@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 
@@ -13,16 +13,20 @@ export class HeaderComponent implements OnInit {
   isLoggedIn = false;
   userName = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn = !!user;
-      this.userName = user ? `${user.firstName} ${user.lastName}` : '';
+      this.userName = user ? `${user.lastName} ${user.firstName}` : '';
     });
   }
 
-  logout() {
-    this.authService.logout();
+  async logout() {
+    await this.authService.logout();
+    await this.router.navigate(['/']);
   }
 }

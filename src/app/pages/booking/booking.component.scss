@@ -261,6 +261,27 @@
   gap: var(--spacing-md);
 }
 
+.empty-slots-state {
+  padding: var(--spacing-lg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--bg-tertiary);
+  text-align: center;
+
+  .empty-slots-title {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
+
+  .empty-slots-text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+  }
+}
+
 .time-slot-btn {
   padding: var(--spacing-md);
   border: 2px solid var(--color-border);

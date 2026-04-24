@@ -1,5 +1,4 @@
-﻿<main class="home">
-  <!-- Hero Section -->
+<main class="home">
   <section class="hero">
     <div class="container">
       <div class="hero-content">
@@ -9,29 +8,63 @@
     </div>
   </section>
 
-  <!-- Featured Services Section -->
   <section class="featured-services">
     <div class="container">
-      <h2 class="section-title">Kiemelt szolgáltatások</h2>
-      <p class="section-subtitle">Ismerje meg népszerű masszázskezeléseinket, amelyek testét és szellemét felfrissítik.</p>
-      
-      <div class="services-grid">
-        <article class="service-card" *ngFor="let service of services">
+      <h2 class="section-title">Szolgáltatások</h2>
+      <p class="section-subtitle">Válasszon a teljes masszázskínálatból, keressen név szerint, vagy rendezze a szolgáltatásokat ár és időtartam alapján.</p>
+
+      <div class="services-toolbar">
+        <label class="toolbar-field search-field">
+          <span class="toolbar-label">Keresés</span>
+          <div class="input-shell">
+            <i
+              class="toolbar-icon ui-icon"
+              [class]="icons.search.className + ' toolbar-icon ui-icon'"
+              [attr.aria-label]="icons.search.label">
+            </i>
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              placeholder="Keresés szolgáltatás neve alapján"
+              class="toolbar-input">
+          </div>
+        </label>
+
+        <label class="toolbar-field sort-field">
+          <span class="toolbar-label">Rendezés</span>
+          <div class="select-shell">
+            <select [(ngModel)]="sortBy" class="toolbar-select">
+              <option value="name-asc">Név szerint</option>
+              <option value="price-asc">Ár szerint növekvő</option>
+              <option value="price-desc">Ár szerint csökkenő</option>
+              <option value="duration-asc">Időtartam szerint növekvő</option>
+              <option value="duration-desc">Időtartam szerint csökkenő</option>
+            </select>
+          </div>
+        </label>
+      </div>
+
+      <div class="results-meta">
+        <p class="results-count">{{ filteredServices.length }} szolgáltatás látható</p>
+      </div>
+
+      <div class="services-grid" *ngIf="filteredServices.length > 0; else noResults">
+        <article class="service-card" *ngFor="let service of filteredServices">
           <div class="service-image-placeholder">
             <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" class="service-image" />
           </div>
           <div class="service-content">
             <h3 class="service-title">{{ service.name }}</h3>
             <p class="service-description">{{ service.description }}</p>
-            
+
             <div class="service-features">
               <div class="feature">
                 <i class="feature-icon ui-icon" [class]="icons.timer.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
-                <span class="feature-text">{{ service.duration }} perc</span>
+                <span class="feature-text">{{ service.durationMinutes }} perc</span>
               </div>
               <div class="feature">
                 <i class="feature-icon ui-icon" [class]="icons.money.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.money.label"></i>
-                <span class="feature-text">{{ service.price | number }} Ft</span>
+                <span class="feature-text">{{ service.priceHuf | number }} Ft</span>
               </div>
             </div>
 
@@ -41,14 +74,20 @@
           </div>
         </article>
       </div>
+
+      <ng-template #noResults>
+        <div class="services-empty-state">
+          <h3>Nincs találat</h3>
+          <p>A megadott keresésre nincs találat. Próbáljon másik kulcsszót vagy más rendezést.</p>
+        </div>
+      </ng-template>
     </div>
   </section>
 
-  <!-- Why Choose Section -->
   <section class="why-choose">
     <div class="container">
       <h2 class="section-title white">Miért válasszon minket?</h2>
-      
+
       <div class="features-grid">
         <div class="feature-card">
           <i class="feature-icon-large ui-icon" [class]="icons.professional.className + ' feature-icon-large ui-icon'" [attr.aria-label]="icons.professional.label"></i>
@@ -77,4 +116,3 @@
     </div>
   </section>
 </main>
-

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="booking-header">
       <h1>Foglaljon időpontot</h1>
-      <p class="booking-subtitle">{{ service.name }} - {{ service.price | number }} Ft</p>
+      <p class="booking-subtitle">{{ service.name }} - {{ service.priceHuf | number }} Ft</p>
     </div>
 
     <div class="progress-steps">
@@ -91,6 +91,18 @@
         </div>
       </div>
 
+      <div class="form-section" *ngIf="selectedProfessional && selectedDate && hasLoadedTimeSlots && availableTimeSlots.length === 0">
+        <div class="section-header">
+          <h3>Szabad időpontok</h3>
+          <p class="section-description">A kiválasztott napra jelenleg nincs foglalható időpont.</p>
+        </div>
+
+        <div class="empty-slots-state">
+          <p class="empty-slots-title">Nincs szabad időpont.</p>
+          <p class="empty-slots-text">Válasszon másik napot vagy másik szakembert.</p>
+        </div>
+      </div>
+
       <div class="form-section" *ngIf="selectedTimeSlot">
         <div class="section-header">
           <h3>Megjegyzés (opcionális)</h3>
@@ -108,7 +120,7 @@
         <h4>Foglalás összesítése</h4>
         <div class="summary-item">
           <span class="summary-label">Szolgáltatás:</span>
-          <span class="summary-value">{{ service?.name }}</span>
+          <span class="summary-value">{{ service.name }}</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">Terapeuta:</span>
@@ -124,7 +136,7 @@
         </div>
         <div class="summary-item total">
           <span class="summary-label">Ár:</span>
-          <span class="summary-value">{{ service?.price | number }} Ft</span>
+          <span class="summary-value">{{ service.priceHuf | number }} Ft</span>
         </div>
       </div>
 
