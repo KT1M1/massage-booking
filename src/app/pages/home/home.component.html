@@ -26,6 +26,7 @@
               <input
                 type="text"
                 [(ngModel)]="searchTerm"
+                (ngModelChange)="onServiceFiltersChange()"
                 placeholder="Keresés szolgáltatás neve alapján"
                 class="toolbar-input">
             </div>
@@ -34,7 +35,10 @@
           <label class="toolbar-field sort-field">
             <span class="toolbar-label">Rendezés</span>
             <div class="select-shell">
-              <select [(ngModel)]="sortBy" class="toolbar-select">
+              <select
+                [(ngModel)]="sortBy"
+                (ngModelChange)="onServiceFiltersChange()"
+                class="toolbar-select">
                 <option value="name-asc">Név szerint</option>
                 <option value="price-asc">Ár szerint növekvő</option>
                 <option value="price-desc">Ár szerint csökkenő</option>
@@ -49,8 +53,8 @@
           <p class="results-count">{{ filteredServices.length }} szolgáltatás látható</p>
         </div>
 
-        <div class="services-grid" *ngIf="filteredServices.length > 0; else noResults">
-          <article class="service-card" *ngFor="let service of filteredServices">
+        <div class="services-grid" *ngIf="visibleServices.length > 0; else noResults">
+          <article class="service-card" *ngFor="let service of visibleServices">
             <div class="service-image-placeholder">
               <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" class="service-image" />
             </div>
@@ -74,6 +78,12 @@
               </a>
             </div>
           </article>
+        </div>
+
+        <div class="load-more-wrapper" *ngIf="hasMoreServices">
+          <button type="button" class="btn btn-secondary btn-lg" (click)="loadMoreServices()">
+            További szolgáltatások betöltése
+          </button>
         </div>
       </ng-container>
 

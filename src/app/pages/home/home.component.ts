@@ -23,12 +23,15 @@ type AdminBookingFilter = 'all' | 'pending' | 'confirmed' | 'completed' | 'cance
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
+  private readonly servicesPageSize = 5;
+
   services: Service[] = [];
   adminBookings: Booking[] = [];
   clientDisplayNames: Record<string, string> = {};
   searchTerm = '';
   sortBy: ServiceSortOption = 'name-asc';
   adminStatusFilter: AdminBookingFilter = 'all';
+  visibleServicesCount = this.servicesPageSize;
   isLoggedIn = false;
   isAdmin = false;
   icons = ICON_PACK;
@@ -61,6 +64,7 @@ export class HomeComponent implements OnInit {
     this.clientDisplayNames = {};
     this.bookingService.getServices().subscribe((services) => {
       this.services = services;
+      this.resetVisibleServices();
     });
   }
 
@@ -96,6 +100,14 @@ export class HomeComponent implements OnInit {
           return left.name.localeCompare(right.name, 'hu');
       }
     });
+  }
+
+  get visibleServices(): Service[] {
+    return this.filteredServices.slice(0, this.visibleServicesCount);
+  }
+
+  get hasMoreServices(): boolean {
+    return this.filteredServices.length > this.visibleServicesCount;
   }
 
   getServiceName(serviceId: string): string {
@@ -139,6 +151,14 @@ export class HomeComponent implements OnInit {
     return this.adminBookings.filter((booking) => booking.status === status).length;
   }
 
+  onServiceFiltersChange() {
+    this.resetVisibleServices();
+  }
+
+  loadMoreServices() {
+    this.visibleServicesCount += this.servicesPageSize;
+  }
+
   onUpdateBookingStatus(bookingId: string, status: Booking['status']) {
     const confirmationText = status === 'confirmed'
       ? 'Biztosan megerősíted ezt a foglalást?'
@@ -153,5 +173,9 @@ export class HomeComponent implements OnInit {
         this.loadAdminBookings();
       }
     });
+  }
+
+  private resetVisibleServices() {
+    this.visibleServicesCount = this.servicesPageSize;
   }
 }
