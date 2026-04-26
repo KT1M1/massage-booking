@@ -83,14 +83,19 @@
             type="button"
             class="btn btn-primary btn-lg btn-full"
             (click)="onBookService()"
-            [disabled]="!isLoggedIn">
-            <span *ngIf="isLoggedIn">Időpont foglalása</span>
-            <span *ngIf="!isLoggedIn">Bejelentkezés szükséges</span>
+            [disabled]="isAdmin">
+            <span *ngIf="isLoggedIn && !isAdmin">Időpont foglalása</span>
+            <span *ngIf="!isLoggedIn">Bejelentkezés a foglaláshoz</span>
+            <span *ngIf="isAdmin">Admin fiókkal nem foglalható</span>
           </button>
 
           <p *ngIf="!isLoggedIn" class="login-hint">
             Az időpontfoglaláshoz <a routerLink="/login" class="link">jelentkezz be</a> vagy
             <a routerLink="/register" class="link">regisztrálj</a>.
+          </p>
+
+          <p *ngIf="isAdmin" class="login-hint">
+            Admin fiókkal nem adhatsz le foglalást. A hozzád érkező foglalásokat a főoldalon kezelheted.
           </p>
         </div>
 

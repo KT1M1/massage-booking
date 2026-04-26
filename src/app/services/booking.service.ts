@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, map, of, catchError } from 'rxjs';
-import { Booking, Professional, Service, TimeSlot } from '../models/models';
+import { Booking, Professional, Service, TimeOffEntry, TimeSlot } from '../models/models';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 
@@ -21,6 +21,16 @@ interface ProfileRow {
   last_name: string;
   phone: string | null;
   is_active?: boolean;
+}
+
+interface ProfileNameRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+interface AdminIdRow {
+  id: string;
 }
 
 interface AdminRow {
@@ -54,12 +64,25 @@ interface TimeRangeRow {
   end_at: string;
 }
 
+interface TimeOffRow {
+  id: string;
+  admin_id: string;
+  type: string;
+  title: string;
+  reason: string | null;
+  start_at: string;
+  end_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface BookingRow {
   id: string;
   client_id: string;
   admin_id: string;
   service_id: string;
   status: Booking['status'];
+  created_at: string;
   starts_at: string;
   ends_at: string;
   client_note: string | null;
@@ -130,6 +153,52 @@ export class BookingService {
     );
   }
 
+  getAdminBookings(): Observable<Booking[]> {
+    return from(this.fetchAdminBookings()).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of([]);
+      })
+    );
+  }
+
+  getProfileDisplayNames(profileIds: string[]): Observable<Record<string, string>> {
+    if (!profileIds.length) {
+      return of({});
+    }
+
+    return from(this.fetchProfileDisplayNames(profileIds)).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of({});
+      })
+    );
+  }
+
+  getAdminTimeOffEntries(): Observable<TimeOffEntry[]> {
+    return from(this.fetchAdminTimeOffEntries()).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of([]);
+      })
+    );
+  }
+
+  createAdminTimeOffEntry(payload: {
+    type: string;
+    title: string;
+    reason?: string;
+    startAt: Date;
+    endAt: Date;
+  }): Observable<boolean> {
+    return from(this.createAdminTimeOffEntryInternal(payload)).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of(false);
+      })
+    );
+  }
+
   createBooking(
     serviceId: string,
     adminId: string,
@@ -147,6 +216,15 @@ export class BookingService {
 
   cancelBooking(bookingId: string): Observable<boolean> {
     return from(this.cancelBookingInternal(bookingId)).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of(false);
+      })
+    );
+  }
+
+  updateBookingStatus(bookingId: string, status: Booking['status']): Observable<boolean> {
+    return from(this.updateBookingStatusInternal(bookingId, status)).pipe(
       catchError((error) => {
         console.error(error);
         return of(false);
@@ -231,6 +309,8 @@ export class BookingService {
       return [];
     }
 
+    await this.markPastConfirmedBookingsAsCompletedForClient(user.id);
+
     const { data, error } = await this.supabaseService
       .getClient()
       .from('bookings')
@@ -240,6 +320,7 @@ export class BookingService {
         admin_id,
         service_id,
         status,
+        created_at,
         starts_at,
         ends_at,
         client_note,
@@ -255,6 +336,75 @@ export class BookingService {
     }
 
     return (data as BookingRow[] | null ?? []).map((row) => this.mapBooking(row));
+  }
+
+  private async fetchAdminBookings(): Promise<Booking[]> {
+    await this.authService.waitUntilReady();
+    const user = this.authService.currentUser;
+
+    if (!user || user.role !== 'admin') {
+      return [];
+    }
+
+    const adminIds = await this.resolveCurrentAdminBookingIds(user.id);
+    if (!adminIds.length) {
+      return [];
+    }
+
+    await this.markPastConfirmedBookingsAsCompletedForAdmins(adminIds);
+
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('bookings')
+      .select(`
+        id,
+        client_id,
+        admin_id,
+        service_id,
+        status,
+        created_at,
+        starts_at,
+        ends_at,
+        client_note,
+        admin_note,
+        booked_price_huf,
+        booked_duration_minutes
+      `)
+      .in('admin_id', adminIds)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data as BookingRow[] | null ?? []).map((row) => this.mapBooking(row));
+  }
+
+  private async fetchAdminTimeOffEntries(): Promise<TimeOffEntry[]> {
+    await this.authService.waitUntilReady();
+    const user = this.authService.currentUser;
+
+    if (!user || user.role !== 'admin') {
+      return [];
+    }
+
+    const adminId = await this.resolveCurrentAdminId(user.id);
+    if (!adminId) {
+      return [];
+    }
+
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('time_off')
+      .select('id, admin_id, type, title, reason, start_at, end_at, created_at, updated_at')
+      .eq('admin_id', adminId)
+      .order('start_at', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data as TimeOffRow[] | null ?? []).map((row) => this.mapTimeOffEntry(row));
   }
 
   private async fetchAvailableTimeSlots(adminId: string, date: Date, serviceId: string): Promise<TimeSlot[]> {
@@ -434,14 +584,80 @@ export class BookingService {
     return !error;
   }
 
+  private async createAdminTimeOffEntryInternal(payload: {
+    type: string;
+    title: string;
+    reason?: string;
+    startAt: Date;
+    endAt: Date;
+  }): Promise<boolean> {
+    await this.authService.waitUntilReady();
+    const user = this.authService.currentUser;
+
+    if (!user || user.role !== 'admin') {
+      return false;
+    }
+
+    const adminId = await this.resolveCurrentAdminId(user.id);
+    if (!adminId) {
+      return false;
+    }
+
+    const { error } = await this.supabaseService
+      .getClient()
+      .from('time_off')
+      .insert({
+        admin_id: adminId,
+        type: payload.type,
+        title: payload.title.trim(),
+        reason: payload.reason?.trim() ? payload.reason.trim() : null,
+        start_at: payload.startAt.toISOString(),
+        end_at: payload.endAt.toISOString()
+      });
+
+    return !error;
+  }
+
   private async cancelBookingInternal(bookingId: string): Promise<boolean> {
+    return this.updateBookingStatusInternal(bookingId, 'cancelled');
+  }
+
+  private async updateBookingStatusInternal(bookingId: string, status: Booking['status']): Promise<boolean> {
     const { error } = await this.supabaseService
       .getClient()
       .from('bookings')
-      .update({ status: 'cancelled' })
+      .update({ status })
       .eq('id', bookingId);
 
     return !error;
+  }
+
+  private async markPastConfirmedBookingsAsCompletedForClient(clientId: string): Promise<void> {
+    const { error } = await this.supabaseService
+      .getClient()
+      .from('bookings')
+      .update({ status: 'completed' })
+      .eq('client_id', clientId)
+      .eq('status', 'confirmed')
+      .lt('ends_at', new Date().toISOString());
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async markPastConfirmedBookingsAsCompletedForAdmins(adminIds: string[]): Promise<void> {
+    const { error } = await this.supabaseService
+      .getClient()
+      .from('bookings')
+      .update({ status: 'completed' })
+      .in('admin_id', adminIds)
+      .eq('status', 'confirmed')
+      .lt('ends_at', new Date().toISOString());
+
+    if (error) {
+      throw error;
+    }
   }
 
   private async fetchServiceRow(serviceId: string): Promise<ServiceRow | null> {
@@ -515,6 +731,7 @@ export class BookingService {
       adminId: row.admin_id,
       serviceId: row.service_id,
       status: row.status,
+      createdAt: new Date(row.created_at),
       startsAt: new Date(row.starts_at),
       endsAt: new Date(row.ends_at),
       clientNote: row.client_note ?? undefined,
@@ -522,6 +739,77 @@ export class BookingService {
       bookedPriceHuf: row.booked_price_huf,
       bookedDurationMinutes: row.booked_duration_minutes
     };
+  }
+
+  private mapTimeOffEntry(row: TimeOffRow): TimeOffEntry {
+    return {
+      id: row.id,
+      adminId: row.admin_id,
+      type: row.type,
+      title: row.title,
+      reason: row.reason ?? undefined,
+      startAt: new Date(row.start_at),
+      endAt: new Date(row.end_at),
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at)
+    };
+  }
+
+  private async fetchProfileDisplayNames(profileIds: string[]): Promise<Record<string, string>> {
+    const uniqueIds = [...new Set(profileIds.filter(Boolean))];
+    if (!uniqueIds.length) {
+      return {};
+    }
+
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('profiles')
+      .select('id, first_name, last_name')
+      .in('id', uniqueIds);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data as ProfileNameRow[] | null ?? []).reduce<Record<string, string>>((acc, row) => {
+      acc[row.id] = `${row.last_name} ${row.first_name}`.trim();
+      return acc;
+    }, {});
+  }
+
+  private async resolveCurrentAdminBookingIds(profileId: string): Promise<string[]> {
+    const adminIds = new Set<string>([profileId]);
+
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('admins')
+      .select('id')
+      .eq('profile_id', profileId);
+
+    if (error) {
+      throw error;
+    }
+
+    (data as AdminIdRow[] | null ?? []).forEach((row) => {
+      adminIds.add(row.id);
+    });
+
+    return [...adminIds];
+  }
+
+  private async resolveCurrentAdminId(profileId: string): Promise<string | null> {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('admins')
+      .select('id')
+      .eq('profile_id', profileId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return (data as AdminIdRow | null)?.id ?? null;
   }
 
   private unwrapProfile(profile: ProfileRow | ProfileRow[] | null): ProfileRow | null {

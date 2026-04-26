@@ -187,6 +187,176 @@
     font-weight: var(--font-weight-medium);
   }
 
+  .admin-dashboard-header {
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .admin-title,
+  .admin-subtitle {
+    text-align: left;
+    max-width: none;
+  }
+
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .admin-stat-card {
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+
+    h4 {
+      margin: 0 0 var(--spacing-sm) 0;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--color-primary-dark);
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  .admin-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    align-items: end;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+  }
+
+  .admin-results-meta {
+    margin-bottom: 0;
+    min-height: 56px;
+    align-items: center;
+    display: flex;
+  }
+
+  .admin-bookings-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .admin-booking-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    background: var(--bg-primary);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+
+    &:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+  }
+
+  .admin-booking-top {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    align-items: flex-start;
+    margin-bottom: var(--spacing-lg);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .admin-booking-user {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+
+    h3 {
+      margin: 0 0 var(--spacing-xs) 0;
+      color: var(--text-primary);
+      font-size: var(--font-size-xl);
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+  }
+
+  .admin-booking-image {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--border-radius-lg);
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .admin-booking-details {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+    padding: var(--spacing-lg) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .admin-booking-note {
+    margin: var(--spacing-lg) 0 0 0;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .admin-booking-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+
+    &.status-confirmed {
+      background-color: rgba(90, 143, 123, 0.1);
+      color: var(--color-success);
+    }
+
+    &.status-pending {
+      background-color: rgba(216, 154, 90, 0.1);
+      color: var(--color-warning);
+    }
+
+    &.status-completed {
+      background-color: rgba(90, 143, 123, 0.12);
+      color: var(--color-primary-dark);
+    }
+
+    &.status-cancelled {
+      background-color: rgba(196, 79, 79, 0.1);
+      color: var(--color-error);
+    }
+  }
+
   .services-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -275,7 +445,7 @@
     padding: var(--spacing-2xl);
     border: 1px dashed var(--color-border);
     border-radius: var(--border-radius-xl);
-    background: linear-gradient(135deg, rgba(90, 143, 123, 0.08) 0%, rgba(243, 188, 46, 0.08) 100%);
+    background: var(--bg-primary);
     text-align: center;
     margin-bottom: var(--spacing-3xl);
 

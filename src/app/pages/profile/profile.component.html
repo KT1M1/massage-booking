@@ -1,6 +1,5 @@
-﻿<main class="profile-page">
+<main class="profile-page">
   <div class="container">
-
     <div *ngIf="isLoading" class="profile-loading">
       Profil betöltése...
     </div>
@@ -22,65 +21,134 @@
 
           <div>
             <h1>Üdvözöljük, {{ userName }}!</h1>
-            <p class="header-subtitle">Kezeld a foglalásaidat és személyes adataidat</p>
+            <p class="header-subtitle" *ngIf="!isAdmin">Kezeld a foglalásaidat és személyes adataidat</p>
+            <p class="header-subtitle" *ngIf="isAdmin">Itt tudod rögzíteni a szabadságodat és áttekinteni a már felvett távolléteket.</p>
           </div>
         </div>
 
-        <a routerLink="/booking" class="btn btn-primary">
+        <a routerLink="/booking" class="btn btn-primary" *ngIf="!isAdmin">
           <span>+ Új foglalás</span>
         </a>
       </div>
 
-      <section class="bookings-section">
-        <div class="section-header">
-          <h2>Foglalásaim</h2>
-          <p class="section-subtitle">Az alábbi lista tartalmazza az összes foglalásodat</p>
-        </div>
+      <section class="admin-time-off" *ngIf="isAdmin">
+        <div class="admin-form-card">
+          <div class="section-header">
+            <h2>Szabadság rögzítése</h2>
+            <p class="section-subtitle">Adj meg egy időszakot, amikor nem vagy elérhető foglalásra.</p>
+          </div>
 
-        <div class="bookings-content">
-          <div class="bookings-list" *ngIf="bookings && bookings.length > 0; else noBookings">
-            <article
-              class="booking-card"
-              *ngFor="let booking of bookings"
-              [class.cancelled]="booking.status === 'cancelled'">
+          <form class="time-off-form" (ngSubmit)="onSubmitTimeOff()">
+            <div class="form-grid">
+              <label class="form-group">
+                <span class="form-label">Cím</span>
+                <input
+                  type="text"
+                  [(ngModel)]="timeOffTitle"
+                  name="timeOffTitle"
+                  class="form-input"
+                  placeholder="Például: Szabadság" />
+              </label>
 
-              <div class="booking-card-header">
-                <div class="booking-left">
-                  <div class="booking-icon">
-                    <img
-                      [src]="getServiceImage(booking.serviceId)"
-                      [alt]="getServiceName(booking.serviceId)" />
-                  </div>
+              <label class="form-group form-group-wide">
+                <span class="form-label">Indoklás</span>
+                <textarea
+                  [(ngModel)]="timeOffReason"
+                  name="timeOffReason"
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Például: Előre tervezett szabadság"></textarea>
+              </label>
 
-                  <div class="booking-info">
-                    <h3 class="booking-title">{{ getServiceName(booking.serviceId) }}</h3>
-                    <p class="booking-professional">
-                      {{ getProfessionalName(booking.adminId) }}
-                    </p>
-                  </div>
+              <div class="date-time-grid">
+                <div class="form-group">
+                  <span class="form-label">Kezdő dátum</span>
+                  <mat-form-field appearance="outline" class="date-field no-inner-label">
+                    <input
+                      matInput
+                      [matDatepicker]="startPicker"
+                      [(ngModel)]="timeOffStartDate"
+                      name="timeOffStartDate"
+                      required>
+                    <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #startPicker></mat-datepicker>
+                  </mat-form-field>
                 </div>
 
-                <span
-                  class="status-badge"
-                  [class.status-confirmed]="booking.status === 'confirmed'"
-                  [class.status-pending]="booking.status === 'pending'"
-                  [class.status-completed]="booking.status === 'completed'"
-                  [class.status-cancelled]="booking.status === 'cancelled'">
-                  {{ getStatusText(booking.status) }}
-                </span>
+                <label class="form-group">
+                  <span class="form-label">Kezdő időpont</span>
+                  <input
+                    type="time"
+                    [(ngModel)]="timeOffStartTime"
+                    name="timeOffStartTime"
+                    class="form-input"
+                    required />
+                </label>
               </div>
 
-              <div class="booking-details">
+              <div class="date-time-grid">
+                <div class="form-group">
+                  <span class="form-label">Záró dátum</span>
+                  <mat-form-field appearance="outline" class="date-field no-inner-label">
+                    <input
+                      matInput
+                      [matDatepicker]="endPicker"
+                      [(ngModel)]="timeOffEndDate"
+                      name="timeOffEndDate"
+                      required>
+                    <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #endPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <label class="form-group">
+                  <span class="form-label">Záró időpont</span>
+                  <input
+                    type="time"
+                    [(ngModel)]="timeOffEndTime"
+                    name="timeOffEndTime"
+                    class="form-input"
+                    required />
+                </label>
+              </div>
+            </div>
+
+            <div class="form-feedback error" *ngIf="adminFormError">{{ adminFormError }}</div>
+            <div class="form-feedback success" *ngIf="adminFormSuccess">{{ adminFormSuccess }}</div>
+
+            <button type="submit" class="btn btn-primary btn-lg admin-submit" [disabled]="isSavingTimeOff">
+              <span *ngIf="!isSavingTimeOff">Szabadság mentése</span>
+              <span *ngIf="isSavingTimeOff">Mentés folyamatban...</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="admin-list-card">
+          <div class="section-header">
+            <h2>Rögzített távollétek</h2>
+            <p class="section-subtitle">Itt látod az eddig felvett szabadságokat és más távolléteket.</p>
+          </div>
+
+          <div class="time-off-list" *ngIf="adminTimeOffEntries.length > 0; else noTimeOffEntries">
+            <article class="time-off-card" *ngFor="let entry of adminTimeOffEntries">
+              <div class="time-off-card-header">
+                <div>
+                  <h3>{{ entry.title }}</h3>
+                  <p class="time-off-type">{{ entry.type === 'vacation' ? 'Szabadság' : entry.type }}</p>
+                </div>
+                <span class="status-badge status-confirmed">Rögzítve</span>
+              </div>
+
+              <div class="time-off-details">
                 <div class="detail-item">
                   <i
                     class="detail-icon ui-icon"
                     [class]="icons.calendar.className + ' detail-icon ui-icon'"
                     [attr.aria-label]="icons.calendar.label">
                   </i>
-
                   <div class="detail-content">
-                    <p class="detail-label">Dátum</p>
-                    <p class="detail-value">{{ booking.startsAt | date:'yyyy. MMMM dd.' }}</p>
+                    <p class="detail-label">Kezdete</p>
+                    <p class="detail-value">{{ formatDateTime(entry.startAt) }}</p>
                   </div>
                 </div>
 
@@ -90,115 +158,215 @@
                     [class]="icons.timer.className + ' detail-icon ui-icon'"
                     [attr.aria-label]="icons.timer.label">
                   </i>
-
                   <div class="detail-content">
-                    <p class="detail-label">Időpont</p>
-                    <p class="detail-value">{{ booking.startsAt | date:'HH:mm' }} - {{ booking.endsAt | date:'HH:mm' }}</p>
+                    <p class="detail-label">Vége</p>
+                    <p class="detail-value">{{ formatDateTime(entry.endAt) }}</p>
                   </div>
                 </div>
 
-                <div class="detail-item" *ngIf="booking.clientNote">
+                <div class="detail-item">
                   <i
                     class="detail-icon ui-icon"
                     [class]="icons.check.className + ' detail-icon ui-icon'"
                     [attr.aria-label]="icons.check.label">
                   </i>
-
                   <div class="detail-content">
-                    <p class="detail-label">Megjegyzés</p>
-                    <p class="detail-value">{{ booking.clientNote }}</p>
+                    <p class="detail-label">Rögzítve</p>
+                    <p class="detail-value">{{ formatDateTime(entry.createdAt) }}</p>
                   </div>
                 </div>
               </div>
 
-              <div
-                class="booking-actions"
-                *ngIf="booking.status === 'pending' || booking.status === 'confirmed'">
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm"
-                  (click)="onCancelBooking(booking.id)"
-                  title="Foglalás lemondása">
-                  <span>
-                    <i
-                      class="ui-icon"
-                      [class]="icons.trash.className + ' ui-icon'"
-                      [attr.aria-label]="icons.trash.label">
-                    </i>
-                    Lemondás
-                  </span>
-                </button>
-              </div>
+              <p class="time-off-reason" *ngIf="entry.reason">{{ entry.reason }}</p>
             </article>
           </div>
 
-          <ng-template #noBookings>
-            <div class="no-bookings-state">
+          <ng-template #noTimeOffEntries>
+            <div class="no-bookings-state compact">
               <div class="empty-icon">
                 <i
                   class="ui-icon"
-                  [class]="icons.search.className + ' ui-icon'"
-                  [attr.aria-label]="icons.search.label">
+                  [class]="icons.calendar.className + ' ui-icon'"
+                  [attr.aria-label]="icons.calendar.label">
                 </i>
               </div>
 
-              <h3>Nincs foglalásod még</h3>
-              <p>Kezdd el a masszázs élményt az első foglalással.</p>
-              <a routerLink="/booking" class="btn btn-primary btn-lg">Foglalj most</a>
+              <h3>Még nincs rögzített szabadság</h3>
+              <p>Az első távolléti időszak felvétele után itt fog megjelenni a lista.</p>
             </div>
           </ng-template>
         </div>
       </section>
 
-      <section class="bookings-stats" *ngIf="bookings && bookings.length > 0">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i
-              class="ui-icon"
-              [class]="icons.check.className + ' ui-icon'"
-              [attr.aria-label]="icons.check.label">
-            </i>
+      <ng-container *ngIf="!isAdmin">
+        <section class="bookings-section">
+          <div class="section-header">
+            <h2>Foglalásaim</h2>
+            <p class="section-subtitle">Az alábbi lista tartalmazza az összes foglalásodat</p>
           </div>
-          <h4>Megerősített</h4>
-          <p class="stat-value">{{ getBookingCount('confirmed') }}</p>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i
-              class="ui-icon"
-              [class]="icons.timer.className + ' ui-icon'"
-              [attr.aria-label]="icons.timer.label">
-            </i>
-          </div>
-          <h4>Függőben</h4>
-          <p class="stat-value">{{ getBookingCount('pending') }}</p>
-        </div>
+          <div class="bookings-content">
+            <div class="bookings-list" *ngIf="bookings && bookings.length > 0; else noBookings">
+              <article
+                class="booking-card"
+                *ngFor="let booking of bookings"
+                [class.cancelled]="booking.status === 'cancelled'">
+                <div class="booking-card-header">
+                  <div class="booking-left">
+                    <div class="booking-icon">
+                      <img
+                        [src]="getServiceImage(booking.serviceId)"
+                        [alt]="getServiceName(booking.serviceId)" />
+                    </div>
 
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i
-              class="ui-icon"
-              [class]="icons.check.className + ' ui-icon'"
-              [attr.aria-label]="icons.check.label">
-            </i>
-          </div>
-          <h4>Befejezett</h4>
-          <p class="stat-value">{{ getBookingCount('completed') }}</p>
-        </div>
+                    <div class="booking-info">
+                      <h3 class="booking-title">{{ getServiceName(booking.serviceId) }}</h3>
+                      <p class="booking-professional">
+                        {{ getProfessionalName(booking.adminId) }}
+                      </p>
+                    </div>
+                  </div>
 
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i
-              class="ui-icon"
-              [class]="icons.calendar.className + ' ui-icon'"
-              [attr.aria-label]="icons.calendar.label">
-            </i>
+                  <span
+                    class="status-badge"
+                    [class.status-confirmed]="booking.status === 'confirmed'"
+                    [class.status-pending]="booking.status === 'pending'"
+                    [class.status-completed]="booking.status === 'completed'"
+                    [class.status-cancelled]="booking.status === 'cancelled'">
+                    {{ getStatusText(booking.status) }}
+                  </span>
+                </div>
+
+                <div class="booking-details">
+                  <div class="detail-item">
+                    <i
+                      class="detail-icon ui-icon"
+                      [class]="icons.calendar.className + ' detail-icon ui-icon'"
+                      [attr.aria-label]="icons.calendar.label">
+                    </i>
+
+                    <div class="detail-content">
+                      <p class="detail-label">Dátum</p>
+                      <p class="detail-value">{{ booking.startsAt | date:'yyyy. MMMM dd.' }}</p>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <i
+                      class="detail-icon ui-icon"
+                      [class]="icons.timer.className + ' detail-icon ui-icon'"
+                      [attr.aria-label]="icons.timer.label">
+                    </i>
+
+                    <div class="detail-content">
+                      <p class="detail-label">Időpont</p>
+                      <p class="detail-value">{{ booking.startsAt | date:'HH:mm' }} - {{ booking.endsAt | date:'HH:mm' }}</p>
+                    </div>
+                  </div>
+
+                  <div class="detail-item" *ngIf="booking.clientNote">
+                    <i
+                      class="detail-icon ui-icon"
+                      [class]="icons.check.className + ' detail-icon ui-icon'"
+                      [attr.aria-label]="icons.check.label">
+                    </i>
+
+                    <div class="detail-content">
+                      <p class="detail-label">Megjegyzés</p>
+                      <p class="detail-value">{{ booking.clientNote }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="booking-actions"
+                  *ngIf="booking.status === 'pending' || booking.status === 'confirmed'">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    (click)="onCancelBooking(booking.id)"
+                    title="Foglalás lemondása">
+                    <span>
+                      <i
+                        class="ui-icon"
+                        [class]="icons.trash.className + ' ui-icon'"
+                        [attr.aria-label]="icons.trash.label">
+                      </i>
+                      Lemondás
+                    </span>
+                  </button>
+                </div>
+              </article>
+            </div>
+
+            <ng-template #noBookings>
+              <div class="no-bookings-state">
+                <div class="empty-icon">
+                  <i
+                    class="ui-icon"
+                    [class]="icons.search.className + ' ui-icon'"
+                    [attr.aria-label]="icons.search.label">
+                  </i>
+                </div>
+
+                <h3>Nincs foglalásod még</h3>
+                <p>Kezdd el a masszázs élményt az első foglalással.</p>
+                <a routerLink="/booking" class="btn btn-primary btn-lg">Foglalj most</a>
+              </div>
+            </ng-template>
           </div>
-          <h4>Lemondott</h4>
-          <p class="stat-value">{{ getBookingCount('cancelled') }}</p>
-        </div>
-      </section>
+        </section>
+
+        <section class="bookings-stats" *ngIf="bookings && bookings.length > 0">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i
+                class="ui-icon"
+                [class]="icons.check.className + ' ui-icon'"
+                [attr.aria-label]="icons.check.label">
+              </i>
+            </div>
+            <h4>Megerősített</h4>
+            <p class="stat-value">{{ getBookingCount('confirmed') }}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i
+                class="ui-icon"
+                [class]="icons.timer.className + ' ui-icon'"
+                [attr.aria-label]="icons.timer.label">
+              </i>
+            </div>
+            <h4>Függőben</h4>
+            <p class="stat-value">{{ getBookingCount('pending') }}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i
+                class="ui-icon"
+                [class]="icons.check.className + ' ui-icon'"
+                [attr.aria-label]="icons.check.label">
+              </i>
+            </div>
+            <h4>Befejezett</h4>
+            <p class="stat-value">{{ getBookingCount('completed') }}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i
+                class="ui-icon"
+                [class]="icons.calendar.className + ' ui-icon'"
+                [attr.aria-label]="icons.calendar.label">
+              </i>
+            </div>
+            <h4>Lemondott</h4>
+            <p class="stat-value">{{ getBookingCount('cancelled') }}</p>
+          </div>
+        </section>
+      </ng-container>
     </ng-container>
   </div>
 </main>

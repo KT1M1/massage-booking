@@ -15,6 +15,7 @@ import { ICON_PACK } from '../../shared/icon-pack';
 export class ServiceDetailComponent implements OnInit {
   service: Service | null = null;
   isLoggedIn = false;
+  isAdmin = false;
   icons = ICON_PACK;
 
   constructor(
@@ -27,6 +28,7 @@ export class ServiceDetailComponent implements OnInit {
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
+      this.isAdmin = user?.role === 'admin';
     });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -40,6 +42,10 @@ export class ServiceDetailComponent implements OnInit {
   onBookService() {
     if (!this.isLoggedIn) {
       this.router.navigate(['/login']);
+      return;
+    }
+
+    if (this.isAdmin) {
       return;
     }
 

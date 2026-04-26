@@ -2,7 +2,7 @@
   <section class="hero">
     <div class="container">
       <div class="hero-content">
-        <h1 class="hero-title">Serenity Spa Masszázs Szalon</h1>
+        <h1 class="hero-title">Masszázs Szalon</h1>
         <p class="hero-subtitle">Fedezze fel a teljes testi és lelki egyensúly útját. Szakmailag képzett masszőrök személyre szabott kezeléseket nyújtanak az Ön igényei szerint.</p>
       </div>
     </div>
@@ -10,70 +10,179 @@
 
   <section class="featured-services">
     <div class="container">
-      <h2 class="section-title">Szolgáltatások</h2>
-      <p class="section-subtitle">Válasszon a teljes masszázskínálatból, keressen név szerint, vagy rendezze a szolgáltatásokat ár és időtartam alapján.</p>
+      <ng-container *ngIf="!isAdmin; else adminDashboard">
+        <h2 class="section-title">Szolgáltatások</h2>
+        <p class="section-subtitle">Válasszon a teljes masszázskínálatból, keressen név szerint, vagy rendezze a szolgáltatásokat ár és időtartam alapján.</p>
 
-      <div class="services-toolbar">
-        <label class="toolbar-field search-field">
-          <span class="toolbar-label">Keresés</span>
-          <div class="input-shell">
-            <i
-              class="toolbar-icon ui-icon"
-              [class]="icons.search.className + ' toolbar-icon ui-icon'"
-              [attr.aria-label]="icons.search.label">
-            </i>
-            <input
-              type="text"
-              [(ngModel)]="searchTerm"
-              placeholder="Keresés szolgáltatás neve alapján"
-              class="toolbar-input">
+        <div class="services-toolbar">
+          <label class="toolbar-field search-field">
+            <span class="toolbar-label">Keresés</span>
+            <div class="input-shell">
+              <i
+                class="toolbar-icon ui-icon"
+                [class]="icons.search.className + ' toolbar-icon ui-icon'"
+                [attr.aria-label]="icons.search.label">
+              </i>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                placeholder="Keresés szolgáltatás neve alapján"
+                class="toolbar-input">
+            </div>
+          </label>
+
+          <label class="toolbar-field sort-field">
+            <span class="toolbar-label">Rendezés</span>
+            <div class="select-shell">
+              <select [(ngModel)]="sortBy" class="toolbar-select">
+                <option value="name-asc">Név szerint</option>
+                <option value="price-asc">Ár szerint növekvő</option>
+                <option value="price-desc">Ár szerint csökkenő</option>
+                <option value="duration-asc">Időtartam szerint növekvő</option>
+                <option value="duration-desc">Időtartam szerint csökkenő</option>
+              </select>
+            </div>
+          </label>
+        </div>
+
+        <div class="results-meta">
+          <p class="results-count">{{ filteredServices.length }} szolgáltatás látható</p>
+        </div>
+
+        <div class="services-grid" *ngIf="filteredServices.length > 0; else noResults">
+          <article class="service-card" *ngFor="let service of filteredServices">
+            <div class="service-image-placeholder">
+              <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" class="service-image" />
+            </div>
+            <div class="service-content">
+              <h3 class="service-title">{{ service.name }}</h3>
+              <p class="service-description">{{ service.description }}</p>
+
+              <div class="service-features">
+                <div class="feature">
+                  <i class="feature-icon ui-icon" [class]="icons.timer.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
+                  <span class="feature-text">{{ service.durationMinutes }} perc</span>
+                </div>
+                <div class="feature">
+                  <i class="feature-icon ui-icon" [class]="icons.money.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.money.label"></i>
+                  <span class="feature-text">{{ service.priceHuf | number }} Ft</span>
+                </div>
+              </div>
+
+              <a [routerLink]="['/services', service.id]" class="btn btn-primary">
+                <span>Foglalás</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </ng-container>
+
+      <ng-template #adminDashboard>
+        <div class="admin-dashboard-header">
+          <h2 class="section-title admin-title">Beérkező foglalások</h2>
+          <p class="section-subtitle admin-subtitle">Az alábbi listában a hozzád érkezett foglalásokat látod. A legújabb foglalások jelennek meg legfelül, és státusz szerint is szűrhetsz.</p>
+        </div>
+
+        <div class="admin-stats" *ngIf="adminBookings.length > 0">
+          <div class="admin-stat-card">
+            <h4>Függőben</h4>
+            <p>{{ getBookingCount('pending') }}</p>
           </div>
-        </label>
-
-        <label class="toolbar-field sort-field">
-          <span class="toolbar-label">Rendezés</span>
-          <div class="select-shell">
-            <select [(ngModel)]="sortBy" class="toolbar-select">
-              <option value="name-asc">Név szerint</option>
-              <option value="price-asc">Ár szerint növekvő</option>
-              <option value="price-desc">Ár szerint csökkenő</option>
-              <option value="duration-asc">Időtartam szerint növekvő</option>
-              <option value="duration-desc">Időtartam szerint csökkenő</option>
-            </select>
+          <div class="admin-stat-card">
+            <h4>Megerősítve</h4>
+            <p>{{ getBookingCount('confirmed') }}</p>
           </div>
-        </label>
-      </div>
-
-      <div class="results-meta">
-        <p class="results-count">{{ filteredServices.length }} szolgáltatás látható</p>
-      </div>
-
-      <div class="services-grid" *ngIf="filteredServices.length > 0; else noResults">
-        <article class="service-card" *ngFor="let service of filteredServices">
-          <div class="service-image-placeholder">
-            <img [src]="service.image || '/assets/img/massage1.jpg'" [alt]="service.name" class="service-image" />
+          <div class="admin-stat-card">
+            <h4>Befejezve</h4>
+            <p>{{ getBookingCount('completed') }}</p>
           </div>
-          <div class="service-content">
-            <h3 class="service-title">{{ service.name }}</h3>
-            <p class="service-description">{{ service.description }}</p>
+          <div class="admin-stat-card">
+            <h4>Lemondva</h4>
+            <p>{{ getBookingCount('cancelled') }}</p>
+          </div>
+        </div>
 
-            <div class="service-features">
+        <div class="admin-toolbar" *ngIf="adminBookings.length > 0">
+          <label class="toolbar-field sort-field">
+            <span class="toolbar-label">Státusz szűrése</span>
+            <div class="select-shell">
+              <select [(ngModel)]="adminStatusFilter" class="toolbar-select">
+                <option value="all">Összes</option>
+                <option value="pending">Függőben</option>
+                <option value="confirmed">Megerősítve</option>
+                <option value="completed">Befejezve</option>
+                <option value="cancelled">Lemondva</option>
+              </select>
+            </div>
+          </label>
+
+          <div class="results-meta admin-results-meta">
+            <p class="results-count">{{ filteredAdminBookings.length }} foglalás látható</p>
+          </div>
+        </div>
+
+        <div class="admin-bookings-list" *ngIf="filteredAdminBookings.length > 0; else noAdminBookings">
+          <article class="admin-booking-card" *ngFor="let booking of filteredAdminBookings">
+            <div class="admin-booking-top">
+              <div class="admin-booking-user">
+                <img
+                  [src]="getServiceImage(booking.serviceId)"
+                  [alt]="getServiceName(booking.serviceId)"
+                  class="admin-booking-image" />
+                <div>
+                  <h3>{{ getServiceName(booking.serviceId) }}</h3>
+                  <p>{{ getClientName(booking.clientId) }}</p>
+                </div>
+              </div>
+
+              <span
+                class="status-badge"
+                [class.status-confirmed]="booking.status === 'confirmed'"
+                [class.status-pending]="booking.status === 'pending'"
+                [class.status-completed]="booking.status === 'completed'"
+                [class.status-cancelled]="booking.status === 'cancelled'">
+                {{ getStatusText(booking.status) }}
+              </span>
+            </div>
+
+            <div class="admin-booking-details">
+              <div class="feature">
+                <i class="feature-icon ui-icon" [class]="icons.calendar.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.calendar.label"></i>
+                <span class="feature-text">{{ booking.startsAt | date:'yyyy. MMMM dd.' }}</span>
+              </div>
               <div class="feature">
                 <i class="feature-icon ui-icon" [class]="icons.timer.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.timer.label"></i>
-                <span class="feature-text">{{ service.durationMinutes }} perc</span>
+                <span class="feature-text">{{ booking.startsAt | date:'HH:mm' }} - {{ booking.endsAt | date:'HH:mm' }}</span>
               </div>
               <div class="feature">
                 <i class="feature-icon ui-icon" [class]="icons.money.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.money.label"></i>
-                <span class="feature-text">{{ service.priceHuf | number }} Ft</span>
+                <span class="feature-text">{{ booking.bookedPriceHuf | number }} Ft</span>
+              </div>
+              <div class="feature">
+                <i class="feature-icon ui-icon" [class]="icons.search.className + ' feature-icon ui-icon'" [attr.aria-label]="icons.search.label"></i>
+                <span class="feature-text">Érkezett: {{ booking.createdAt | date:'yyyy. MMMM dd. HH:mm' }}</span>
               </div>
             </div>
 
-            <a [routerLink]="['/services', service.id]" class="btn btn-primary">
-              <span>Foglalás</span>
-            </a>
-          </div>
-        </article>
-      </div>
+            <p class="admin-booking-note" *ngIf="booking.clientNote">{{ booking.clientNote }}</p>
+
+            <div class="admin-booking-actions" *ngIf="booking.status === 'pending'">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="onUpdateBookingStatus(booking.id, 'confirmed')">
+                Megerősítés
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                (click)="onUpdateBookingStatus(booking.id, 'cancelled')">
+                Elutasítás
+              </button>
+            </div>
+          </article>
+        </div>
+      </ng-template>
 
       <ng-template #noResults>
         <div class="services-empty-state">
@@ -81,10 +190,17 @@
           <p>A megadott keresésre nincs találat. Próbáljon másik kulcsszót vagy más rendezést.</p>
         </div>
       </ng-template>
+
+      <ng-template #noAdminBookings>
+        <div class="services-empty-state">
+          <h3>Még nincs beérkező foglalás</h3>
+          <p>Amint valaki időpontot foglal hozzád, itt azonnal meg fog jelenni.</p>
+        </div>
+      </ng-template>
     </div>
   </section>
 
-  <section class="why-choose">
+  <section class="why-choose" *ngIf="!isAdmin">
     <div class="container">
       <h2 class="section-title white">Miért válasszon minket?</h2>
 

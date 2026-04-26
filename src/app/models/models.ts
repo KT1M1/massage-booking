@@ -43,6 +43,7 @@ export interface Booking {
   serviceId: string;
   adminId: string;
   status: BookingStatus;
+  createdAt: Date;
   startsAt: Date;
   endsAt: Date;
   clientNote?: string;
@@ -60,4 +61,16 @@ export interface TimeSlot {
   startsAt: Date;
   endsAt: Date;
   available: boolean;
+}
+
+export interface TimeOffEntry {
+  id: string;
+  adminId: string;
+  type: string;
+  title: string;
+  reason?: string;
+  startAt: Date;
+  endAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

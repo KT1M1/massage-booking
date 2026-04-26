@@ -8,6 +8,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { Professional, Service, TimeSlot } from '../../models/models';
 import { BookingService } from '../../services/booking.service';
+import { AuthService } from '../../services/auth.service';
 import { ICON_PACK } from '../../shared/icon-pack';
 
 @Component({
@@ -41,10 +42,19 @@ export class BookingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private authService: AuthService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.authService.waitUntilReady();
+    const user = this.authService.currentUser;
+    if (user?.role === 'admin') {
+      alert('Admin fiókkal nem adhatsz le foglalást.');
+      await this.router.navigate(['/']);
+      return;
+    }
+
     const serviceId = this.route.snapshot.queryParamMap.get('serviceId');
     if (serviceId) {
       this.bookingService.getServiceById(serviceId).subscribe((service) => {
